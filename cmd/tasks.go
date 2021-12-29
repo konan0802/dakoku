@@ -7,21 +7,32 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/konan0802/dakoku/handler"
+	"github.com/konan0802/dakoku/infra"
+	"github.com/konan0802/dakoku/usecase"
+
 	"github.com/spf13/cobra"
 )
 
 // tasksCmd represents the tasks command
 var tasksCmd = &cobra.Command{
 	Use:   "tasks",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "固定タスクとAsanaタスクの一覧を表示",
+	Long:  "固定タスクとAsanaタスクの一覧を表示",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("tasks called")
+		// DI
+		arp := infra.NewAsanaRepository()
+		trp := infra.NewTogglRepository()
+		uc := usecase.NewUsecase(arp, trp)
+		hdr := handler.NewHandler(uc)
+
+		// handler
+		ret, err := hdr.Tasks(cmd, args)
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			return
+		}
+		fmt.Println(ret)
 	},
 }
 
